@@ -17,6 +17,7 @@ Before running the application, make sure you have the following installed:
 - Flask (`pip install Flask`)
 - spaCy (`pip install spacy`)
 - scikit-learn (`pip install scikit-learn`)
+- en_core_web_md (`python -m spacy download en_core_web_md`)
 
 ## Structure
 
