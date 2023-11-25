@@ -8,7 +8,7 @@ from nltk.stem import PorterStemmer
 app = Flask(__name__)
 
 # Step 3: Read and Parse Documentation
-docs_folder = "docs"
+docs_folder = "DTIT TARDIS AI ChatBot -- Hackathon Kosice 2023/customer_handbook/docs"
 
 def read_docs(folder):
     documents = []
