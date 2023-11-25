@@ -30,4 +30,4 @@ http://127.0.0.1:5000
 ```
 ## Chatbot design
 
-![Design](https://github.com/TELIT-Hackathon2023/2-corechi/TardisDesign.png)
+![Design](TardisDesign.png)
