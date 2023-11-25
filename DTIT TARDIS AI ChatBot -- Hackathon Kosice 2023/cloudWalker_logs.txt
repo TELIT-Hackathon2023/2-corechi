@@ -1,0 +1,66 @@
+2023-09-22 00:25:47.526  WARN 1 --- [or-http-epoll-4] r.netty.http.client.HttpClientConnect    : [2a673533-1, L:/172.23.0.2:36918 - R:stargate.caas-p01.telekom.de/10.14.246.235:443] The connection observed an error
+
+io.netty.handler.timeout.ReadTimeoutException: null
+
+2023-09-22 00:25:47.527 ERROR 1 --- [or-http-epoll-4] d.t.e.c.r.RemoteFileVaultProviderService : Failed to send request to service
+
+org.springframework.web.reactive.function.client.WebClientRequestException: nested exception is io.netty.handler.timeout.ReadTimeoutException
+at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:141)
+Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException:
+Error has been observed at the following site(s):
+*__checkpoint ⇢ Request to PATCH https://stargate.caas-p01.telekom.de/cloudwalker-delivery/v1/de-telekom-ott-aax-marketing-v9/files/f18fa7c5-19dc-43a1-bd93-7f117e7100a8/prepare [DefaultWebClient]
+Original Stack Trace:
+at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:141)
+at reactor.core.publisher.MonoErrorSupplied.subscribe(MonoErrorSupplied.java:55)
+at reactor.core.publisher.Mono.subscribe(Mono.java:4490)
+at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103)
+at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222)
+at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222)
+at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222)
+at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93)
+at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onError(MonoFlatMapMany.java:204)
+at reactor.core.publisher.SerializedSubscriber.onError(SerializedSubscriber.java:124)
+at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.whenError(FluxRetryWhen.java:225)
+at reactor.core.publisher.FluxRetryWhen$RetryWhenOtherSubscriber.onError(FluxRetryWhen.java:274)
+at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onError(FluxContextWrite.java:121)
+at reactor.core.publisher.FluxConcatMap$ConcatMapImmediate.drain(FluxConcatMap.java:415)
+at reactor.core.publisher.FluxConcatMap$ConcatMapImmediate.onNext(FluxConcatMap.java:251)
+at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:107)
+at reactor.core.publisher.EmitterProcessor.drain(EmitterProcessor.java:537)
+at reactor.core.publisher.EmitterProcessor.tryEmitNext(EmitterProcessor.java:343)
+at reactor.core.publisher.SinkManySerialized.tryEmitNext(SinkManySerialized.java:100)
+at reactor.core.publisher.InternalManySink.emitNext(InternalManySink.java:27)
+at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.onError(FluxRetryWhen.java:190)
+at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201)
+at reactor.netty.http.client.HttpClientConnect$HttpObserver.onUncaughtException(HttpClientConnect.java:399)
+at reactor.netty.ReactorNetty$CompositeConnectionObserver.onUncaughtException(ReactorNetty.java:695)
+at reactor.netty.resources.DefaultPooledConnectionProvider$DisposableAcquire.onUncaughtException(DefaultPooledConnectionProvider.java:211)
+at reactor.netty.resources.DefaultPooledConnectionProvider$PooledConnection.onUncaughtException(DefaultPooledConnectionProvider.java:464)
+at reactor.netty.channel.FluxReceive.drainReceiver(FluxReceive.java:245)
+at reactor.netty.channel.FluxReceive.onInboundError(FluxReceive.java:466)
+at reactor.netty.channel.ChannelOperations.onInboundError(ChannelOperations.java:488)
+at reactor.netty.channel.ChannelOperationsHandler.exceptionCaught(ChannelOperationsHandler.java:144)
+at io.netty.channel.AbstractChannelHandlerContext.invokeExceptionCaught(AbstractChannelHandlerContext.java:302)
+at io.netty.channel.AbstractChannelHandlerContext.invokeExceptionCaught(AbstractChannelHandlerContext.java:281)
+at io.netty.channel.AbstractChannelHandlerContext.fireExceptionCaught(AbstractChannelHandlerContext.java:273)
+at io.netty.handler.timeout.ReadTimeoutHandler.readTimedOut(ReadTimeoutHandler.java:98)
+at io.netty.handler.timeout.ReadTimeoutHandler.channelIdle(ReadTimeoutHandler.java:90)
+at io.netty.handler.timeout.IdleStateHandler$ReaderIdleTimeoutTask.run(IdleStateHandler.java:506)
+at io.netty.handler.timeout.IdleStateHandler$AbstractIdleTask.run(IdleStateHandler.java:478)
+at io.netty.util.concurrent.PromiseTask.runTask(PromiseTask.java:98)
+at io.netty.util.concurrent.ScheduledFutureTask.run(ScheduledFutureTask.java:170)
+at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164)
+at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:469)
+at io.netty.channel.epoll.EpollEventLoop.run(EpollEventLoop.java:384)
+at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:986)
+at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: io.netty.handler.timeout.ReadTimeoutException: null
+
+2023-09-22 00:25:47.527  INFO 1 --- [or-http-epoll-4] d.t.e.c.r.RemoteFileVaultProviderService : Caught error: 500 INTERNAL_SERVER_ERROR "Failed to send request to service"; nested exception is org.springframework.web.reactive.function.client.WebClientRequestException: nested exception is io.netty.handler.timeout.ReadTimeoutException
+2023-09-22 00:26:20.187  WARN 1 --- [or-http-epoll-5] r.netty.http.client.HttpClientConnect    : [3cd28b03-1, L:/172.23.0.2:37536 - R:stargate.caas-p01.telekom.de/10.14.246.235:443] The connection observed an error
+
+io.netty.handler.timeout.ReadTimeoutException: null
+
+2023-09-22 00:26:20.188 ERROR 1 --- [or-http-epoll-5] d.t.e.c.r.RemoteFileVaultProviderService : Failed to send request to service

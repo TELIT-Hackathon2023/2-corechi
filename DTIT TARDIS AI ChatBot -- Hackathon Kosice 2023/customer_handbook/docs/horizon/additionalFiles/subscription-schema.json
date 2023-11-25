@@ -1,0 +1,64 @@
+{
+  "type": "object",
+  "properties": {
+    "spec": {
+      "type": "object",
+      "properties": {
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "eventType": {
+                "type": "string"
+              },
+              "deliveryType": {
+                "type": "string",
+                "enum": ["callback", "sse"]
+              },
+              "payloadType": {
+                "type": "string",
+                "enum": ["data", "dataref"]
+              },
+              "callback": {
+                "type": "string",
+                "description": "URL where events will be posted to by Horzion. Only needs to be set when `deliveryType` is `callback.`"
+              },
+              "trigger": {
+                "type": "object",
+                "properties": {
+                  "responseFilter": {
+                    "type": "array",
+                    "description": "Array of JSON-paths that should be sent to the consuming system.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "advancedSelectionFilter": {
+                    "type": "object",
+                    "description": "Filter-operator. Also see https://developer.telekom.de/docs/src/tardis_customer_handbook/horizon/Filter_Operators/"
+                  },
+                  "selectionFilter": {
+                    "type": "object",
+                    "description": "Deprecated, please use `advancedSelectionFilter`"
+                  }
+                }
+              }
+            },
+            "required": [
+              "eventType",
+              "deliveryType",
+              "payloadType"
+            ]
+          }
+        }
+      },
+      "required": [
+        "subscriptions"
+      ]
+    }
+  },
+  "required": [
+    "spec"
+  ]
+}

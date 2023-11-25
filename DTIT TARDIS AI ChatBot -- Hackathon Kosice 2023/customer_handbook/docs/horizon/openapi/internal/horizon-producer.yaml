@@ -1,0 +1,219 @@
+---
+openapi: 3.0.3
+info:
+  title: CloudEvents Intermediary
+  description: "Simple API, demonstrating the use of CloudEvents as provided by an\
+    \ Intermediary (Broker) for event fan-out to consumers, as per their authorized\
+    \ subscription type and trigger criteria."
+  contact:
+    name: "ENterprise Integration (ENI) Service Hub, Team Callisto"
+    url: https://codeshare.wesp.telekom.net/gitlab/tardis/documentation/horizon
+    email: DL-DH_EI_Team_Callisto@telekom.de
+  version: 1.0.5
+servers:
+  - url: http://localhost:8080/
+    description: intermediary
+tags:
+  - name: Subscriptions
+  - name: Publishing
+  - name: Streams
+paths:
+  /v1/events:
+    post:
+      tags:
+        - Publishing
+      summary: Create a new event (Provider Publish)
+      description: |-
+        Create a new event (Provider Publish).
+
+                Provider subject is identified by the `sub` attribute of the access token in the authorization header.
+
+                * `201 No Content` - Access token + subscription id authorized by provider are valid.
+                * `400 Bad Request`- Malformed subscription id parameter.
+                * `401 Unauthorized` - No access token provided by provider.
+                * `403 Forbidden` - Subscription id is not authorized by provider (belongs to another provider).
+                * `500 Internal Server Error` - All unexpected internal errors.
+                * `503 Service Unavailable`- Service is temporarily unavailable and unable to fulfil request.
+      operationId: publishEvent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        "201":
+          description: No Content` - Access token + subscription id authorized by
+            provider are valid.
+          headers:
+            Location:
+              description: URI location to newly created resource.
+              style: simple
+              schema:
+                format: uri
+                type: string
+        "400":
+          description: "Bad Request. The submitted resource does not fulfil the required\
+            \ schema, or mandatory parameters."
+        "401":
+          description: Unauthorized. The publisher has not provided authorization
+            to fulfil the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "403":
+          description: Forbidden. The publisher does not have sufficient authorization
+            to fulfil the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "500":
+          description: Internal Server Error. The intermediary could not fulfil the
+            request due to some unexpected condition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "503":
+          description: Service Unavailable. The intermediary is unable to accept the
+            event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    head:
+      tags:
+        - HealthCheck
+      summary: health check endpoint
+      description: may be called to check whether the endpoint is available
+      operationId: checkHealth
+      responses:
+        "204":
+          description: '`No Content` - endpoint available.'
+          headers:
+            X-Health-Check-Timestamp:
+              description: time when the health check was done
+              style: simple
+              schema:
+                format: date-time
+                type: string
+
+components:
+  schemas:
+    Event:
+      description: "This resource is used to emit and receive events, and resource\
+        \ representations or resource identifiers (subject)."
+      required:
+        - id
+        - type
+        - source
+        - specversion
+      type: object
+      properties:
+        data:
+          description: "As defined by the term Data, CloudEvents MAY include domain-specific\
+            \ information about the occurrence. When present, this information will\
+            \ be encapsulated within data."
+          type: object
+          nullable: false
+        datacontenttype:
+          description: "Content type of `data` value. This attribute enables `data`\
+            \ to carry any type of content, whereby format and encoding might differ\
+            \ from that of the chosen event format."
+          type: string
+          example: application/json
+        dataref:
+          format: url
+          description: "The `dataref` attribute MAY be used to reference another location\
+            \ where this information is stored. The information, whether accessed\
+            \ via `data` or `dataref` MUST be identical."
+          type: string
+          example: http://apihost/some/api/v1/resource/1234
+          nullable: false
+        dataschema:
+          format: url
+          description: Identifies the schema that `data` adheres to. Incompatible
+            changes to the schema SHOULD be reflected by a different URI.
+          type: string
+          example: http://apihost/some/path/resource/1234
+        id:
+          format: uuid
+          description: Identifies the event. Producers MUST ensure that `source` +
+            `id` is unique for each distinct event.
+          type: string
+          example: 38ce597-bca4-4bc9-9f00-0339c935568b
+          nullable: false
+        source:
+          format: url
+          description: "Identifies the context in which an event happened. Often this\
+            \ will include information such as the type of the event source, the organization\
+            \ publishing the event or the process that produced the event. The exact\
+            \ syntax and semantics behind the data encoded in the URI is defined by\
+            \ the event producer."
+          type: string
+          example: http://apihost/some/path/resource/1234
+          nullable: false
+        specversion:
+          description: The version of the CloudEvents specification which the event
+            uses. This enables the interpretation of the context. Compliant event
+            producers MUST use a value of `1.0` when referring to this version of
+            the specification.
+          minLength: 1
+          example: "1.0"
+          type: string
+          nullable: false
+        time:
+          format: date-time
+          description: "Timestamp when the occurrence happened. If the time of the\
+            \ occurrence cannot be determined then this attribute MAY be set to some\
+            \ other time (such as the current time) by the CloudEvents producer, however\
+            \ all producers for the same `source` MUST be consistent in this respect."
+          type: string
+          example: 2020-10-02T15:00:00.05Z
+        type:
+          description: "This attribute contains a value describing the type of event\n\
+            related to the originating occurrence. Often this attribute is used for\n\
+            routing, observability, policy enforcement, etc."
+          type: string
+          example: com.group.org.service.function.v1
+          nullable: false
+    Problem:
+      description: RFC Problem Details. See https://tools.ietf.org/html/rfc7807#page-5
+        for more details.
+      type: object
+      properties:
+        detail:
+          description: "A human-readable explanation specific to this occurrence of\
+            \ the problem. The \"detail\" member, if present, ought to focus on helping\
+            \ the client correct the problem, rather than giving debugging information."
+          type: string
+        instance:
+          format: uri
+          description: A URI reference that identifies the specific occurrence of
+            the problem. It may or may not yield further information if dereferenced.
+          type: string
+        status:
+          format: int32
+          description: "The HTTP status code ([RFC7231], Section 6) generated by the\
+            \ origin server for this occurrence of the problem. The \"status\" member,\
+            \ if present, is only advisory; it conveys the HTTP status code used for\
+            \ the convenience of the consumer. Generators MUST use the same status\
+            \ code in the actual HTTP response."
+          type: integer
+        title:
+          description: "A short, human-readable summary of the problem type. Consumers\
+            \ SHOULD NOT automatically dereference the type URI."
+          type: string
+        type:
+          format: uri
+          description: "A URI reference [RFC3986] that identifies the problem type.\
+            \ Consumers MUST use the \"type\" string as the primary identifier for\
+            \ the problem type."
+          default: about:blank
+          type: string
+  securitySchemes:
+    openid_access:
+      type: openIdConnect
+      description: Authentication requirements - Access Token in Authorization header.
+      openIdConnectUrl: https://idpserver

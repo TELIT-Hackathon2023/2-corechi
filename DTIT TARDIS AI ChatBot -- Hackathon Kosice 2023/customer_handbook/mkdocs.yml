@@ -1,0 +1,184 @@
+site_name: T‧AR‧D‧I‧S Customer Handbook
+site_description: Deutsche Telekom IT, T‧AR‧D‧I‧S Platform
+site_author: ENI et al
+
+# Repository - CHANGE ME
+repo_name: dhei/teams/all/customer_handbook
+repo_url: https://gitlab.devops.telekom.de/dhei/teams/all/customer_handbook
+edit_uri: "edit/master/docs/"
+
+theme:
+  name: 'material'
+  language: 'en'
+  shortcuts:
+    help: 191    # ?
+    next: 78     # n
+    previous: 80 # p
+    search: 83   # s
+  palette:
+    primary: 'pink'
+    accent: 'indigo'
+  features:
+    - navigation.tabs
+    - navigation.instant
+    - navigation.indexes
+  icon:
+    logo: material/book-cog
+    repo: fontawesome/brands/gitlab
+
+# CHANGE ME
+extra:
+  social:
+    - icon: fontawesome/brands/gitlab
+      link: 'https://gitlab.devops.telekom.de/dhei/teams/all/customer_handbook'
+
+# https://github.com/mkdocs/mkdocs/wiki/MkDocs-Plugins#git-repos--info
+plugins:
+  # built-in MkDocs search plugin
+  - search
+  # helps building plantuml images
+  - build_plantuml:
+      render: "local"
+      bin_path: "/usr/bin/plantuml"
+      output_format: "svg"
+      diagram_root: "docs/diagrams"
+      output_folder: "out"
+      input_folder: "src"
+  # fetch the last revision date per markdown file and display it in a localized way
+  - git-revision-date-localized:
+      fallback_to_build_date: true
+  # minifies the HTML of the page just prior to being written to disk
+  - minify:
+      minify_html: true
+  # build pdf doc
+  - with-pdf:
+      cover_title: "T‧AR‧D‧I‧S Customer Handbook"
+      cover_subtitle: "From https://developer.telekom.de"
+      author: "ENI Hub"
+      copyright: "Deutsche Telekom IT GmbH"
+      # Optionally if you would like to name your file differently. Otherwise it will be named as folder, e.g. apiguide.pdf
+      output_path: "pdf/Tardis_Customer_Handbook.pdf"
+
+
+# https://python-markdown.github.io/extensions/
+markdown_extensions:
+  # implements a block extension which can be used to specify a PlantUML diagram which will be converted into an image and inserted in the document
+  - plantuml_markdown:
+      cachedir: /tmp
+      format: svg
+  # adds code/syntax highlighting to standard Python-Markdown code blocks using Pygments.
+  - codehilite
+  # adds syntax for defining footnotes in Markdown documents.
+  - footnotes
+  # adds rST-style admonitions to Markdown documents.
+  - admonition
+  # generates a Table of Contents from a Markdown document and adds it into the resulting HTML document.
+  - toc:
+      permalink: "#"
+  #Adds support for Mermaid-diagrams
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  #Adds support für annotations
+  - attr_list
+  - md_in_html
+
+  # https://github.com/Python-Markdown/markdown/wiki/Third-Party-Extensions
+  # preserves LaTeX math equations during the Markdown conversion process so that they can be used with libraries like MathJax.
+  - pymdownx.arithmatex
+  # improve emphasis (bold and italic) handling
+  - pymdownx.betterem:
+      smart_enable: all
+  # add support for insert and superscript tags
+  - pymdownx.caret
+  # accept, reject, or view (view is very limited) CriticMarkup syntax.
+  - pymdownx.critic
+  # creates collapsible elements that hide their content
+  - pymdownx.details
+  # add support for inserting emojis (or html linked to either images on a CDN or local) via :shortnames:
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  # like CodeHilite, but for inline code blocks.
+  - pymdownx.inlinehilite
+  # auto-link email and http addresses.
+  - pymdownx.magiclink
+  # adds the ability to insert <mark></mark> tags.
+  - pymdownx.mark
+  # adds syntax for creating special characters such as trademarks, arrows, fractions, etc.
+  - pymdownx.smartsymbols
+  # nested fences and flow charts and sequence diagrams (additional JS libraries required for charts and diagrams).
+  - pymdownx.superfences
+  # adds GFM style task lists.
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  # adds delete which inserts <del></del> tags and subscript which inserts <sub></sub> tags.
+  - pymdownx.tilde
+  - pymdownx.snippets
+  # allows to add additional content to parts of the text which are then shown on hover
+  - abbr
+  # The Tabbed extension
+  - pymdownx.tabbed:
+      alternate_style: true
+  # allows to add HTML attributes and CSS classes to Markdown elements
+  - attr_list
+
+docs_dir: docs
+nav:
+  - Overview: README.md
+  - Overview:
+    - Product: README.md
+    - Environment: StarGate_Environment_Overview.mdw
+    - Customer Journeys: customer_journeys.md
+    - API Exposure & Subscription: StarGate_Expsoure_Overview.md
+    - Role to Permission Management with Chevron: Permission_Management.md
+    - Versioning & Endpoint: endpoint/README.md
+    - API Security: APISecurity.md
+    - Support: support/README.md
+    - IP Addresses: support/ip-addresses-env.md
+  - StarGate: StarGate/README.md
+  - Spacegate: StarGate/Spacegate.md
+  - Stargate Step-By-Step Tutorial: StarGate/Stargate_Step-By-Step_Tutorial.md
+  - Iris: 
+    - Iris: Iris/README.md
+    - ZAM instructions: Iris/zam_instructions.md
+  - Rover: rover/README.md
+  - Spectre: spectre/README.md
+  - Mission-Control: mission-control/README.md
+  - Chevron:
+    - All about Chevron: chevron/README.md
+    - chevron/spring-boot-client-example/README.md
+    - Postman Collection for Chevron-API: chevron/postman/README.md
+  - Horizon: 
+    - Step-By-Step Tutorial: horizon/Horizon_Step-By-Step_Tutorial.md
+    - Reference Guide: horizon/README.md
+    - Filter Operators: horizon/Filter_Operators.md
+    - Horizon PoC Zone: horizon/PoC_Zone.md
+  - CloudWalker : CloudWalker/README.md
+  - Heartbeat: heartbeat/README.md
+  - Raccoon Monitoring: 
+    - About Raccoon: raccoon/README.md
+    - Self Service: raccoon/Raccoon_Self_Service.md
+    - How to upgrade to Self Service: raccoon/Migrate_To_Raccoon_Self_Service.md
+    - Grafana:
+      - General infos: raccoon/grafana/README.md
+      - HowTos: raccoon/grafana/HowTos.md
+      - Unified Alerting: raccoon/grafana/Unified_Alerting.md
+      - Legacy Alerting: raccoon/grafana/Legacy_Alerting.md
+    - Products as Enabler:
+      - Metrics Collector: raccoon/products-as-enabler/Metrics_Collector.md
+      - Grafana CLI: raccoon/products-as-enabler/Grafana_Cli.md
+    - CaaS Rancher Monitoring: raccoon/CaaS_Rancher_Monitoring.md
+  - Drax Tracing: drax/doc_Drax_README.md
+  - Maverick:
+    - All about Maverick: Maverick/Maverick.md
+    - Maverick/ApiRoadmap.md
+    - Maverick/ApiChangelog.md
+    - Maverick/ApiDeprecation.md
+    - Maverick/ApiVisibility.md
+    - Maverick/RoverOnline.md
+  - Orion: orion/index.md
+  - GitLab: gitlab/getting-started.md
+  - Sample Code: Codes_for_customers.md
+  - External Partner Documentation: external-documentation/README.md

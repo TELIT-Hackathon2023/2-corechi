@@ -1,0 +1,188 @@
+{
+	"info": {
+		"_postman_id": "008ff37d-8571-4321-91c6-fe9e13f86505",
+		"name": "Horizon Quickstart",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Send Event",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"{{$guid}}\",\r\n    \"source\": \"http://apihost/some/path/resource/1234\",\r\n    \"specversion\": \"1.0\",\r\n    \"type\": \"de.telekom.eni.quickstart.v1\",\r\n    \"datacontenttype\": \"application/json\",\r\n    \"dataref\": \"http://apihost/some/api/v1/resource/1234\",\r\n    \"data\": {\r\n        \"quickstart\": \"test\"\r\n    },\r\n    \"dataschema\": \"http://apihost/schema/definition.json\"\r\n}"
+				},
+				"url": {
+					"raw": "https://stargate-playground.live.dhei.telekom.de/horizon/events/v1",
+					"protocol": "https",
+					"host": [
+						"stargate-playground",
+						"live",
+						"dhei",
+						"telekom",
+						"de"
+					],
+					"path": [
+						"horizon",
+						"events",
+						"v1"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{_clientToken1}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"if (! pm.variables.get('_clientCount')) {",
+					"    throw new Error(\"_clientCount not defined.\")",
+					"}",
+					"",
+					"console.info('Running Collection Pre-request-Scripts')",
+					"console.log('Fetching tokens for at least ' + pm.variables.get('_clientCount') + ' client(s).')",
+					"checkKeycloak();",
+					"",
+					"for (i = 1; i <= pm.variables.get('_clientCount'); i++)",
+					"{",
+					"    checkClientAndSecret();",
+					"",
+					"    var getToken = true;",
+					"    var clientId = pm.variables.get('_clientId'.concat(i));",
+					"    var clientSecret = pm.variables.get('_clientSecret'.concat(i));",
+					"    var tokenVar = '_clientToken'.concat(i);",
+					"    var expVar = '_clientExpiry'.concat(i);",
+					"",
+					"    console.log('Checking token for client:', clientId);",
+					"    if (!pm.variables.get(expVar) || ",
+					"        !pm.variables.get(tokenVar)) {",
+					"        console.log('Token or expiry date are missing')",
+					"    } else if (pm.variables.get(expVar) <= (new Date()).getTime()) {",
+					"        console.log('Token is expired')",
+					"    } else {",
+					"        getToken = false;",
+					"        console.log('Token and expiry date are all good');",
+					"    }",
+					"",
+					"    if (getToken === true) { ",
+					"        requestToken(clientId, clientSecret, expVar, tokenVar);",
+					"    }",
+					"}",
+					"",
+					"/* request the token */",
+					"function requestToken(clientId, clientSecret, expVar, tokenVar) {",
+					"    console.log('Requesting token for client ', clientId);",
+					"",
+					"    var tokenURL = pm.variables.get('keyCloakUrl').concat(\"/auth/realms/\")",
+					"            .concat(pm.variables.get('realm')).concat(\"/protocol/openid-connect/token\");",
+					"",
+					"    pm.sendRequest({",
+					"        url: tokenURL,",
+					"        method: 'POST',",
+					"        header: 'Content-Type:application/x-www-form-urlencoded',",
+					"        body: {",
+					"            mode: 'urlencoded',",
+					"            urlencoded: [",
+					"                { key: \"client_id\", value: clientId },",
+					"                { key: \"client_secret\", value: clientSecret},",
+					"                { key: \"grant_type\", value: \"client_credentials\" },",
+					"            ]",
+					"        }",
+					"    }, function (err, res) {",
+					"        pm.test('Successful fetching token for ' + clientId, function () {",
+					"            pm.expect(err).to.be.null;",
+					"        });",
+					"        console.log(err ? err : res.json());",
+					"        if (err === null) {",
+					"            console.log('Saving the token and expiry date for client', clientId);",
+					"            var responseJson = res.json();",
+					"            pm.environment.set(tokenVar, responseJson.access_token)",
+					"",
+					"            var expiryDate = new Date();",
+					"            expiryDate.setSeconds(expiryDate.getSeconds() + responseJson.expires_in);",
+					"            pm.environment.set(expVar, expiryDate.getTime());",
+					"        }",
+					"    });",
+					"}",
+					"",
+					"/* check for client and secret */",
+					"function checkClientAndSecret() {",
+					"    var hasClientId = pm.variables.get('_clientId'.concat(i))",
+					"    var hasClientSecret = pm.variables.get('_clientSecret'.concat(i))",
+					"    var error = new Array();",
+					"    if (! hasClientId) error.push('_clientId'.concat(i))",
+					"    if (! hasClientSecret) error.push('_clientSecret'.concat(i))",
+					"    if (! hasClientId || ! hasClientSecret) {",
+					"        throw new Error(error.join(', ').concat(' not defined.'))",
+					"    }",
+					"}",
+					"",
+					"/* check keycloak */",
+					"function checkKeycloak() {",
+					"    var hasKeyCloakUrl = pm.variables.get('keyCloakUrl');",
+					"    var hasRealm = pm.variables.get('realm');",
+					"    var error = new Array();",
+					"    if (! hasKeyCloakUrl) error.push('keyCloakUrl')",
+					"    if (! hasRealm) error.push('realm')",
+					"    if (! hasKeyCloakUrl || ! hasRealm) {",
+					"        throw new Error(error.join(', ').concat(' not defined.'))",
+					"    }",
+					"}",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "_clientCount",
+			"value": "1"
+		},
+		{
+			"key": "keyCloakUrl",
+			"value": "https://iris-playground.live.dhei.telekom.de"
+		},
+		{
+			"key": "realm",
+			"value": "default"
+		},
+		{
+			"key": "_clientId1",
+			"value": "eni--qs-pub--quickstart-publisher"
+		},
+		{
+			"key": "_clientSecret1",
+			"value": "*****"
+		}
+	]
+}

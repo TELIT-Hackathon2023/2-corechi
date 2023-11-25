@@ -1,0 +1,646 @@
+---
+openapi: 3.0.3
+info:
+  title: CloudEvents Intermediary
+  description: "Simple API, demonstrating the use of CloudEvents as provided by an\
+    \ Intermediary (Broker) for event fan-out to consumers, as per their authorized\
+    \ subscription type and trigger criteria."
+  contact:
+    name: "ENterprise Integration (ENI) Service Hub, Team Callisto"
+    url: 'https://enterprise-architecture.pages.telekom.de/tardis-docs/horizon'
+    email: DL-DH_EI_Team_Callisto@telekom.de
+  version: 1.0.5
+servers:
+  - url: 'https://{stargateFqhn}/horizon'
+    description: Access via Stargate
+    variables:
+      stargateFqhn:
+        description: "FQHN of Stargate"
+        default: "https://stargate-playground.live.dhei.telekom.de"
+tags:
+  - name: Subscriptions
+  - name: Streaming
+paths:
+  /sse/v1/{eventType}:
+    head:
+      tags:
+        - HealthCheck
+      summary: health check endpoint
+      description: may be called to check whether the endpoint is available
+      operationId: checkSseHealth
+      parameters:
+        - schema:
+            type: string
+          name: eventType
+          in: path
+          required: true
+          description: The event type of the subscription.
+      responses:
+        "204":
+          description: '`No Content` - endpoint available.'
+          headers:
+            X-Health-Check-Timestamp:
+              description: time when the health check was done
+              style: simple
+              schema:
+                format: date-time
+                type: string
+        '500':
+          description: 'Internal Server Error. The intermediary could not fulfil the request due to some unexpected condition.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /sse/v1/{eventType}/{subscriptionId}:
+    get:
+      tags:
+        - Streaming
+      summary: Read all subscribed events as an event stream
+      description: "Read event stream for a previously authorized subscription created\
+        \ by a provider. The consumer must provide a valid access token and subscription\
+        \ id for the request to be successfully fulfilled.\n\n        Consumer subject\
+        \ is identified by the `sub` attribute of the access token in the authorization\
+        \ header. In order to receive event streams, the consumer must be subscribed\
+        \ to the intermediary.\n\n        * `200 OK` - Access token + subscription\
+        \ id valid for consumer.\n        * `400 Bad Request`- Malformed/missing subscriptionId\
+        \ parameter.\n        * `401 Unauthorized` - No access token provided by consumer.\n\
+        \        * `403 Forbidden` - Subscription id does not belong to consumer.\n\
+        \        * `404 Not Found` - Subscription id does not exist.\n        * `500\
+        \ Internal Server Error` - All unexpected internal errors.\n        * `503\
+        \ Service Unavailable`- Service is temporarily unavailable and unable to fulfil\
+        \ request."
+      operationId: read-events
+      parameters:
+        - schema:
+            type: string
+          name: eventType
+          in: path
+          required: true
+          description: The event type of the subscription.
+        - name: subscriptionId
+          in: path
+          description: Id of the subscription
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK. Returns a successful response with the `application/stream+json`\
+            \ media-type, for the consumer to start reading events streamed to it."
+          content:
+            application/stream+json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+            text/event-stream:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        "400":
+          description: Bad Request - Malformed subscription id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "401":
+          description: Unauthorized. The publisher has not provided authorization
+            to fulfil the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "403":
+          description: Forbidden. The publisher does not have sufficient authorization
+            to fulfil the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "404":
+          description: Not Found - The given subscription id does not exist.
+        "500":
+          description: Internal Server Error. The intermediary could not fulfil the
+            request due to some unexpected condition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "503":
+          description: Service Unavailable. The intermediary is temporarily unavailable
+            to fulfil the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /subscriptions/v1:
+    get:
+      tags:
+        - Subscriptions
+      summary: Query subscriptions
+      description: "Return all active consumer subscriptions for the provider making\
+        \ the request. The provider is identified by its authorization token (subject),\
+        \ this endpoint provides a collection of all active subscriptions that a provider\
+        \ has authorized and created for its consumers. The provider may optionally\
+        \ provide `subscriberId`, the subject of the consumer, to narrow the resulting\
+        \ list to subscriptions belonging only to the given subscriber.The provider\
+        \ must ensure that only `authorized` consumers can retrieve and manage their\
+        \ subscriptions.\n \nProvider subject is identified by the `sub` attribute\
+        \ of the access token in the authorization header.\n\n* `200 OK` - Access\
+        \ token valid + returns list of all active subscriptions or empty array if\
+        \ there are no active subscriptions, or for given subscriberId.\n* `401 Unauthorized`\
+        \ - No access token provided by provider to intermediary.\n* `403 Forbidden`\
+        \ - Insufficient permissions for provider to list subscriptions.\n* `500 Internal\
+        \ Server Error` - All unexpected internal errors.\n* `503 Service Unavailable`-\
+        \ Service is temporarily unavailable and unable to fulfil request."
+      operationId: listSubscriptions
+      deprecated: true
+      parameters:
+        - name: subscriberId
+          in: query
+          description: "Subscriber Id, the subject of the authorized consumer, as provided\
+          \ by the provider. If not set, then all subscriptions managed by the provider\
+          \ are returned. This query parameter is case sensitive"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK -  Access token valid + returns list of all active subscriptions\
+            \ or empty array if there are no active subscriptions, or for given subscriberId."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionResponse'
+        "401":
+          description: Unauthorized - No access token provided by provider to intermediary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "403":
+          description: Forbidden` - Insufficient permissions for provider to list
+            subscriptions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "500":
+          description: Internal Server Error. The intermediary could not fulfil the
+            request due to some unexpected condition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "503":
+          description: Service Unavailable. The intermediary is unable to accept the
+            event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    post:
+      tags:
+        - Subscriptions
+      deprecated: true
+      summary: Create subscription (DEPRECATED)
+      description: "Create a new subscription. The absence of a `trigger` resource\
+        \ template, indicates all event types supported by the provider. The provider\
+        \ provides a list of `type` for the events that are supported by the provider\
+        \ - this should form part of the API specification documentation.  \\n\\nIdentical\
+        \ subscription requests for a consumer, will only yield one subscription;\
+        \ the same subscription payload (type, trigger, etc.) will yield a single\
+        \ subscription for the consumer. DEPRECATED. Please refrain from using this operation and use the rover based declarative method where feasible."
+      operationId: create-subscription
+      parameters:
+        - name: X-Pubsub-Subscriber-Id
+          in: header
+          description: Consumer subject from consumer's access token.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+      responses:
+        "201":
+          description: "Created - Provider authorized subscription for the consumer,\
+            \ and successfully subscribed consumer to Callback. For callbacks to be\
+            \ delivered, the intermediary must be subscribed to the consumer receiving\
+            \ the callback, and the given callback URL must be accessible by the intermediary."
+          headers:
+            X-Subscription-Id:
+              description: Id of the generated subscription
+              style: simple
+              schema:
+                type: string
+            Location:
+              description: URL of serverSendEvent for this subscription
+              style: simple
+              schema:
+                format: url
+                type: string
+        "303":
+          description: "OK - Provider authorized subscription for the consumer, and\
+            \ successfully subscribed consumer to Server Sent Events. The consumer\
+            \ will be redirected to an endpoint to receive a `application/stream+json`\
+            \ with the resource event payload. For server-sent-events to be delivered,\
+            \ the consumer must be subscribed to the intermediary in order to follow\
+            \ redirects to the location that will provide the stream."
+          headers:
+            Location:
+              description: URL of serverSendEvent for this subscription
+              style: simple
+              schema:
+                format: url
+                type: string
+            X-Subscription-Id:
+              description: Id of the generated subscription
+              style: simple
+              schema:
+                type: string
+        "400":
+          description: "Bad Request: Subscription invalid"
+        "401":
+          description: Unauthorized. The publisher has not provided authorization
+            to fulfil the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "403":
+          description: Forbidden. The publisher does not have sufficient authorization
+            to fulfil the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "500":
+          description: Internal Server Error. The intermediary could not fulfil the
+            request due to some unexpected condition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "503":
+          description: Service Unavailable. The intermediary is unable to accept the
+            event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    head:
+      tags:
+        - HealthCheck
+      summary: health check endpoint
+      description: may be called to check whether the endpoint is available
+      operationId: checkSubscriptionsHealth
+      deprecated: true
+      responses:
+        "204":
+          description: '`No Content` - endpoint available.'
+          headers:
+            X-Health-Check-Timestamp:
+              description: time when the health check was done
+              style: simple
+              schema:
+                format: date-time
+                type: string
+        '500':
+          description: 'Internal Server Error. The intermediary could not fulfil the request due to some unexpected condition.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /subscriptions/v1/{subscriptionId}:
+    delete:
+      tags:
+        - Subscriptions
+      deprecated: true
+      summary: Delete subscription by Id. (DEPRECATED)
+      description: "Deletes the subscription based on the subscription id. A provider\
+        \ may only delete a subscription that it has authorized. If a provider attempts\
+        \ to delete a subscription it has not authorized (a subscription id that was\
+        \ authorized by another provider/publisher), the intermediary will respond\
+        \ with `403 Forbidden`.\n\n        Provider subject is identified by the `sub`\
+        \ attribute of the access token in the authorization header.\n\n        *\
+        \ `204 No Content` - Access token + subscription id authorized by provider\
+        \ are valid.\n        * `400 Bad Request`- Malformed subscription id parameter.\n\
+        \        * `401 Unauthorized` - No access token provided by provider.\n  \
+        \      * `403 Forbidden` - Subscription id is not authorized by provider (belongs\
+        \ to another provider).\n        * `404 Not Found` - Subscription id does\
+        \ not exist.\n        * `500 Internal Server Error` - All unexpected internal\
+        \ errors.\n        * `503 Service Unavailable`- Service is temporarily unavailable\
+        \ and unable to fulfil request. DEPRECATED. Please refrain from using this operation and use the rover based declarative method where feasible."
+      operationId: delete-subscription
+      parameters:
+        - name: subscriptionId
+          in: path
+          description: Consumer subscription id
+          required: true
+          schema:
+            type: string
+            nullable: false
+      responses:
+        "204":
+          description: No Content - Provider successfully unsubscribed consumer from
+            an event it publishes
+        "400":
+          description: Bad Request - Malformed subscription id.
+        "401":
+          description: Unauthorized. The publisher has not provided authorization
+            to fulfil the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "403":
+          description: Forbidden. The publisher does not have sufficient authorization
+            to fulfil the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "404":
+          description: Not Found - The given subscription id does not exist.
+        "500":
+          description: Internal Server Error. The intermediary could not fulfil the
+            request due to some unexpected condition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "503":
+          description: Service Unavailable. The intermediary is unable to accept the
+            event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+components:
+  schemas:
+    Event:
+      description: "This resource is used to emit and receive events, and resource\
+        \ representations or resource identifiers (subject). Note that either 'data' or 'dataref' must be present, if
+        subscribers use both, both must be present. Subscribers will only receive one, depending on their subscription."
+      required:
+        - id
+        - type
+        - source
+        - specversion
+      type: object
+      properties:
+        data:
+          description: "As defined by the term Data, CloudEvents MAY include domain-specific\
+            \ information about the occurrence. When present, this information will\
+            \ be encapsulated within data."
+          type: object
+          nullable: false
+        datacontenttype:
+          description: "Content type of `data` value. This attribute enables `data`\
+            \ to carry any type of content, whereby format and encoding might differ\
+            \ from that of the chosen event format."
+          type: string
+          example: application/json
+        dataref:
+          format: url
+          description: "The `dataref` attribute MAY be used to reference another location\
+            \ where this information is stored. The information, whether accessed\
+            \ via `data` or `dataref` MUST be identical."
+          type: string
+          example: http://apihost/some/api/v1/resource/1234
+          nullable: false
+        dataschema:
+          format: url
+          description: Identifies the schema that `data` adheres to. Incompatible
+            changes to the schema SHOULD be reflected by a different URL.
+          type: string
+          example: http://apihost/some/path/resource/1234
+        id:
+          format: uuid
+          description: Identifies the event. Producers MUST ensure that `source` +
+            `id` is unique for each distinct event.
+          type: string
+          example: 38ce597-bca4-4bc9-9f00-0339c935568b
+          nullable: false
+        source:
+          format: url
+          description: "Identifies the context in which an event happened. Often this\
+            \ will include information such as the type of the event source, the organization\
+            \ publishing the event or the process that produced the event. The exact\
+            \ syntax and semantics behind the data encoded in the URL is defined by\
+            \ the event producer."
+          type: string
+          example: http://apihost/some/path/resource/1234
+          nullable: false
+        specversion:
+          description: The version of the CloudEvents specification which the event
+            uses. This enables the interpretation of the context. Compliant event
+            producers MUST use a value of `1.0` when referring to this version of
+            the specification.
+          minLength: 1
+          example: "1.0"
+          type: string
+          nullable: false
+        time:
+          format: date-time
+          description: "Timestamp when the occurrence happened. If the time of the\
+            \ occurrence cannot be determined then this attribute MAY be set to some\
+            \ other time (such as the current time) by the CloudEvents producer, however\
+            \ all producers for the same `source` MUST be consistent in this respect."
+          type: string
+          example: 2020-10-02T15:00:00.05Z
+        type:
+          description: "This attribute contains a value describing the type of event\n\
+            related to the originating occurrence. Often this attribute is used for\n\
+            routing, observability, policy enforcement, etc."
+          type: string
+          example: com.group.org.service.function.v1
+          nullable: false
+    Problem:
+      description: RFC Problem Details. See https://tools.ietf.org/html/rfc7807#page-5
+        for more details.
+      type: object
+      properties:
+        detail:
+          description: "A human-readable explanation specific to this occurrence of\
+            \ the problem. The \"detail\" member, if present, ought to focus on helping\
+            \ the client correct the problem, rather than giving debugging information."
+          type: string
+        instance:
+          format: uri
+          description: A URI reference that identifies the specific occurrence of
+            the problem. It may or may not yield further information if dereferenced.
+          type: string
+        status:
+          format: int32
+          description: "The HTTP status code ([RFC7231], Section 6) generated by the\
+            \ origin server for this occurrence of the problem. The \"status\" member,\
+            \ if present, is only advisory; it conveys the HTTP status code used for\
+            \ the convenience of the consumer. Generators MUST use the same status\
+            \ code in the actual HTTP response."
+          type: integer
+        title:
+          description: "A short, human-readable summary of the problem type. Consumers\
+            \ SHOULD NOT automatically dereference the type URL."
+          type: string
+        type:
+          format: url
+          description: "A URL reference [RFC3986] that identifies the problem type.\
+            \ Consumers MUST use the \"type\" string as the primary identifier for\
+            \ the problem type."
+          default: about:blank
+          type: string
+    Subscription:
+      description: "Subscription to event types with the given delivery and trigger\
+        \ matching criteria. The provider offering resource subscriptions, must provide\
+        \ the list of types supported within their API specification. Please refer\
+        \ to the API provider's documentation for more details."
+      required:
+        - deliveryType
+        - payloadType
+        - type
+      type: object
+      properties:
+        callback:
+          format: url
+          minLength: 1
+          type: string
+          example: http://apihost/consumer/callback
+        deliveryType:
+          description: How the events are to be delivered to the subscriber (callback
+            or server sent event).
+          enum:
+            - server_sent_event
+            - callback
+          type: string
+          example: server_sent_event
+          nullable: false
+        payloadType:
+          description: How the payload is to be delivered (data or dataref).
+          enum:
+            - data
+            - dataref
+          type: string
+          example: dataref
+          nullable: false
+        trigger:
+          allOf:
+            - $ref: '#/components/schemas/Trigger'
+            - description: "The trigger provides 2 functions: selectionFilter and responseFilter"
+        type:
+          description: "This attribute contains a value describing the type of event\
+            \ related to the originating occurrence. Often this attribute is used\
+            \ for routing, observability, policy enforcement, etc."
+          maxLength: 100
+          minLength: 1
+          type: string
+          example: com.group.org.service.function.v1
+          nullable: false
+    Trigger:
+      description: "The `trigger` provides 2 functions:\n- `selectionFilter`: Is the\
+        \ event selection criteria, as a map of key values - where the key is the\
+        \ attribute/field (field1, field1.subfield1, etc.) and the value is the requested\
+        \ value to be matched.\n   Events matching the given criteria are selected\
+        \ from all events generated by the provider as a logical AND operation,\n\
+        - `responseFilter`: Is the list of fields to be returned in `data` response\
+        \ payloads. When the subscription is of type `data`, the responseFilter field\
+        \ is evaluated to include only specified fields in payload responses. If the\
+        \ subscription is of type `dataref`, this responseFilter is ignored."
+      type: object
+      properties:
+        responseFilter:
+          allOf:
+            - $ref: '#/components/schemas/ListString'
+            - description: "Fields to include in payload responses, when event subscription\
+              \ is of type data. Data provided as an Array of strings."
+        selectionFilter:
+          allOf:
+            - $ref: '#/components/schemas/MapStringString'
+            - description: "vents matching the given criteria are selected from all\
+              \ events generated by the provider as a logical AND operation. Structure\
+              \ will be of the original subscribed resource, as published by the provider."
+              example:
+                field1: value1
+                field2: value2
+    ListString:
+      type: array
+      items:
+        type: string
+    MapStringString:
+      type: object
+      additionalProperties:
+        type: string
+    SubscriptionResponse:
+      title: SubscriptionResponse
+      description: The unique subscription id for a consumer's subscription. This
+        is present only in subscription management responses.
+      required:
+        - deliveryType
+        - payloadType
+        - type
+        - createdAt
+        - publisherId
+        - subscriberId
+        - subscriptionId
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Subscription'
+      properties:
+        callback:
+          format: url
+          minLength: 1
+          type: string
+          example: http://apihost/consumer/callback
+        deliveryType:
+          description: How the events are to be delivered to the subscriber (callback
+            or server sent event).
+          enum:
+            - server_sent_event
+            - callback
+          type: string
+          example: server_sent_event
+          nullable: false
+        payloadType:
+          description: How the payload is to be delivered (data or dataref).
+          enum:
+            - data
+            - dataref
+          type: string
+          example: dataref
+          nullable: false
+        trigger:
+          allOf:
+            - $ref: '#/components/schemas/Trigger'
+            - description: "The trigger provides 2 functions: selectionFilter and responseFilter"
+        type:
+          description: "This attribute contains a value describing the type of event\
+            \ related to the originating occurrence. Often this attribute is used\
+            \ for routing, observability, policy enforcement, etc."
+          maxLength: 100
+          minLength: 1
+          type: string
+          example: com.group.org.service.function.v1
+          nullable: false
+        createdAt:
+          description: Timestamp when the subscription was created.
+          type: string
+        publisherId:
+          description: Provider subject from provider's access token.
+          type: string
+        subscriberId:
+          description: Consumer subject from consumer's access token.
+          type: string
+        subscriptionId:
+          description: The unique subscription id for a consumer's subscription. This
+            is present only in subscription management responses.
+          type: string
+  securitySchemes:
+    openid_access:
+      type: openIdConnect
+      description: Authentication requirements - Access Token in Authorization header.
+      openIdConnectUrl: 'https://iris-playground.live.dhei.telekom.de'

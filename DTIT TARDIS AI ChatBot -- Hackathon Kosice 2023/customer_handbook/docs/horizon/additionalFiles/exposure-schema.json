@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "spec": {
+      "type": "object",
+      "properties": {
+        "exposures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "eventType": {
+                "type": "string",
+                "description": "The event-type that the exposure is for."
+              },
+              "visibility": {
+                "enum": ["world"],
+                "description": "Can be `world`. If set to `world` events can also be received by consumers in the internet."
+              }
+            },
+            "required": ["eventType"]
+          }
+        }
+      },
+      "required": ["exposures"]
+    }
+  },
+  "required": ["spec"]
+}

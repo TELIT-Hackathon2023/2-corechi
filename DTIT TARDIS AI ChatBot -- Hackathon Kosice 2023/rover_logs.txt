@@ -1,0 +1,7 @@
+07:36:53.605 INFO Property: rover.token=prod--iamenabler--twXXXXXXXXXXdGVhbTogInR3aXgiCg== (Source=Environment-Variable rover.token->ROVER_TOKEN)
+07:36:54.775 WARN Error reading service account token from: [/var/run/secrets/kubernetes.io/serviceaccount/token]. Ignoring.
+07:36:55.376 WARN Error reading service account token from: [/var/run/secrets/kubernetes.io/serviceaccount/token]. Ignoring.
+java.lang.RuntimeException: can't check activities for 'de.telekom.ei.rover.ctl.Apply@359df09a'
+
+Caused by: io.fabric8.kubernetes.client.KubernetesClientException: Failure executing: GET at: https://master-rover.prod.dhei.telekom.de/api/v1/namespaces/iamenabler--twix/serviceaccounts/tcp-operator. Message: Unauthorized. Received status: Status(apiVersion=v1, code=401, details=null, kind=Status, message=Unauthorized, metadata=ListMeta(_continue=null, remainingItemCount=null, resourceVersion=null, selfLink=null, additionalProperties={}), reason=Unauthorized, status=Failure, additionalProperties={}).
+at io.fabric8.kubernetes.client.dsl.base.OperationSupport.requestFailure(OperationSupport.java:684)
