@@ -17,6 +17,9 @@ Before running the application, make sure you have the following installed:
 - spaCy (`pip install spacy`)
 - scikit-learn (`pip install scikit-learn`)
 
+## Swagger API documentation
+Can be accessed in api-swagger-documentation.yml [api-swagger-documentation.yml]
+
 ## Structure
 
 app.py: The main Flask application file.
