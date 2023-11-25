@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot</title>
+    <script>
+        function showNotification() {
+            alert("Rating saved!");
+        }
+    </script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -91,16 +96,25 @@
     </form>
     <!-- Add this code inside the body tag, where you want to display the chat history -->
     <div>
-        {% for entry in chat_history[::-1] %}
-            {% if entry.img_src %}
-                <p>Input from you: {{ entry.user_input }}</p>
-                <img src="{{ url_for('static', filename='img/' + entry.img_src) }}" alt="User Image" width="250">
-            {% else %}
-                <p>Input from you: {{ entry.user_input }}</p>
-                <p>Answer from Chatbot: {{ entry.answer }}</p>
-            {% endif %}
-        {% endfor %}
-    </div>
+    {% for entry in chat_history[::-1] %}
+        {% if entry.img_src %}
+            <img src="{{ entry.img_src }}" alt="Image">
+        {% else %}
+            <p>Input from you: {{ entry.user_input }}</p>
+            <p>Answer from Chatbot: {{ entry.answer }}</p>
+            <div class="radio-group">
+                <label for="like">I like the answer</label>
+                <input type="radio" name="rating" value="like" id="like" required>
+            </div>
 
+            <div class="radio-group">
+                <label for="dislike">I don't like the answer</label>
+                <input type="radio" name="rating" value="dislike" id="dislike" required>
+            </div>
+            <input type="submit" value="Submit my rating" onclick="showNotification()">
+            <input type="submit" value="How does this work?">
+        {% endif %}
+    {% endfor %}
+</div>
 </body>
 </html>
