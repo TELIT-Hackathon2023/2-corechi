@@ -89,13 +89,18 @@
         <input type="text" id="user_input" name="user_input" required placeholder="Enter your message...">
         <input type="submit" value="Submit">
     </form>
-    {% if user_input %}
-        <p>Input from you: {{ user_input }}</p>
-        {% if img_src %}
-            <img src="{{ url_for('static', filename='img/' + img_src) }}" alt="User Image" width="250">
-        {% else %}
-            <p>Answear from Chatbot: {{ answer }}</p>
-        {% endif %}
-    {% endif %}
+    <!-- Add this code inside the body tag, where you want to display the chat history -->
+    <div>
+        {% for entry in chat_history[::-1] %}
+            {% if entry.img_src %}
+                <p>Input from you: {{ entry.user_input }}</p>
+                <img src="{{ url_for('static', filename='img/' + entry.img_src) }}" alt="User Image" width="250">
+            {% else %}
+                <p>Input from you: {{ entry.user_input }}</p>
+                <p>Answer from Chatbot: {{ entry.answer }}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+
 </body>
 </html>

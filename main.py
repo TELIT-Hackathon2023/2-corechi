@@ -6,8 +6,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
 
-
-docs_folder = "DTIT TARDIS AI ChatBot -- Hackathon Kosice 2023/customer_handbook/docs"
+# Step 3: Read and Parse Documentation
+docs_folder = "docs"
 
 
 def read_docs(folder):
@@ -22,7 +22,7 @@ def read_docs(folder):
 
 documents = read_docs(docs_folder)
 
-
+# Step 4: Tokenization and Text Processing
 nlp = spacy.load("en_core_web_sm")
 
 
@@ -33,12 +33,15 @@ def preprocess_text(text):
 
 processed_docs = [preprocess_text(doc) for doc in documents]
 
-
+# Step 5: Build a Knowledge Base
 knowledge_base = dict(zip(map(tuple, processed_docs), documents))
 
-
+# Step 7: Answer Retrieval
 vectorizer = TfidfVectorizer()
 tfidf_matrix = vectorizer.fit_transform([" ".join(doc) for doc in processed_docs])
+
+# History to store chat interactions
+chat_history = []
 
 
 def get_most_similar(query_vector):
@@ -48,16 +51,38 @@ def get_most_similar(query_vector):
 
 
 def extract_relevant_info(document, query):
-    sentences = document.split(". ")  
+    sentences = document.split(". ")  # Split the document into sentences
     query_vector = vectorizer.transform([" ".join(preprocess_text(query))])
-    similarity_scores = cosine_similarity(query_vector, vectorizer.transform([" ".join(preprocess_text(sent)) for sent in sentences]))
-    most_similar_sentence_index = similarity_scores.argmax()
-    return sentences[most_similar_sentence_index]
+    similarity_scores = cosine_similarity(query_vector,
+                                          vectorizer.transform([" ".join(preprocess_text(sent)) for sent in sentences]))
+
+    # Set a higher threshold for similarity scores to filter out less relevant answers
+    threshold = 0.1  # Adjust this threshold based on your needs
+
+    # Check if there are any sentences in the document
+    if len(sentences) == 0:
+        return "I can't answer this question."
+
+    # Find the index of the most similar sentence with a score above the threshold
+    valid_indices = [i for i, score in enumerate(similarity_scores[0]) if score > threshold]
+
+    if not valid_indices:
+        return "I can't answer this question."
+
+    most_similar_sentence_index = valid_indices[0]
+
+    # Check if the index is within the valid range
+    if 0 <= most_similar_sentence_index < len(sentences):
+        return sentences[most_similar_sentence_index]
+    else:
+        return "I can't answer this question."
 
 
+# Flask routes
 @app.route('/')
 def index():
-    return render_template('index.html')
+    reversed_chat_history = chat_history[::-1]  # Reverse the order
+    return render_template('index.html', chat_history=reversed_chat_history)
 
 
 @app.route('/obrazok')
@@ -69,20 +94,27 @@ def display_image():
 def chat():
     user_input = request.form['user_input']
 
+    # Check if the input contains an image tag
     if '![' in user_input and '](img/' in user_input:
+        # Extract the image source from the input
         img_src = user_input.split('](img/')[1].split(')')[0]
 
+        # Check if the image file exists
         img_path = os.path.join(os.path.dirname(__file__), 'static', 'img', img_src)
         if os.path.exists(img_path):
-            return render_template('index.html', user_input=user_input, img_src=img_src)
+            chat_history.append({'user_input': user_input, 'img_src': img_src})
+            return render_template('index.html', chat_history=chat_history)
 
+    # Process text as usual if not an image
     processed_query = preprocess_text(user_input)
     query_vector = vectorizer.transform([" ".join(processed_query)])
     most_similar_document = get_most_similar(query_vector)
 
+    # Extract relevant information from the document based on the user's query
     relevant_info = extract_relevant_info(most_similar_document, user_input)
 
-    return render_template('index.html', user_input=user_input, answer=relevant_info)
+    chat_history.append({'user_input': user_input, 'answer': relevant_info})
+    return render_template('index.html', chat_history=chat_history)
 
 
 if __name__ == '__main__':
