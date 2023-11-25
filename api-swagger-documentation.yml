@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  title: Chat Application API
+  description: API documentation for the Chat Application
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000
+tags:
+  - name: Chat
+    description: Operations related to chat functionality
+paths:
+  /:
+    get:
+      summary: Get chat history
+      description: Retrieve the chat history with reversed order.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                chat_history:
+                  - user_input: "Hello, how are you?"
+                    intent: { "greeting": 0.9 }
+                    entities: []
+                    answer: "I'm fine, thank you!"
+                  - user_input: "Tell me about the weather."
+                    intent: { "weather": 0.8 }
+                    entities: []
+                    answer: "I'm sorry, I can't provide weather information."
+
+  /chat:
+    post:
+      summary: Post a user input for chat
+      description: Submit a user input for chat processing.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                user_input:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                chat_history:
+                  - user_input: "How does photosynthesis work?"
+                    intent: { "science": 0.9 }
+                    entities: []
+                    answer: "Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods with the help of chlorophyll pigments."
+                  - user_input: "Who discovered penicillin?"
+                    intent: { "history": 0.7 }
+                    entities: []
+                    answer: "Alexander Fleming discovered penicillin."
+
+components:
+  schemas:
+    ChatEntry:
+      type: object
+      properties:
+        user_input:
+          type: string
+          description: User input for the chat
+        intent:
+          type: object
+          description: Intent recognition results
+          additionalProperties:
+            type: number
+          example: { "greeting": 0.9 }
+        entities:
+          type: array
+          description: Named entities recognized in the user input
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+                description: Entity text
+              label:
+                type: string
+                description: Entity label
+          example: []
+        answer:
+          type: string
+          description: Chatbot's answer to the user input
