@@ -1,0 +1,22 @@
+stages:
+  - tardis
+  - build
+
+default:
+  tags: ["run_sysbox"]
+
+job1:
+  image: 'mtr.devops.telekom.de/tardis-customer/roverctl:prod'
+  stage: tardis
+  environment:
+    name: TARDIS
+  script:
+    - 'echo "This job uses an image from Tardis-MTR"'
+
+job2:
+  image: 'mtr.devops.telekom.de/my-example/example-test:prod'
+  stage: build
+  environment:
+    name: INTERNAL
+  script:
+    - 'echo "This job uses an image from my internal MTR"'

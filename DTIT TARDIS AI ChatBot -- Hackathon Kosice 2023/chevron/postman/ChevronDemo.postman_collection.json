@@ -1,0 +1,1604 @@
+{
+	"info": {
+		"_postman_id": "0108182d-c5e5-42dd-bb33-e2bdfc2abcad",
+		"name": "Chevron Demo",
+		"description": "Client API for consuming permissions from Chevron runtime\n\nContact Support:\n Name: Service Hub Enterprise Integration (ENI)\n Email: DL-DH_EI_Team_Io@telekom.de",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Iris-Broker",
+			"item": [
+				{
+					"name": "Get id-token",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessTokenUrl",
+									"value": "https://{{irisBrokerHost}}/auth/realms/user-idp/protocol/openid-connect/token",
+									"type": "string"
+								},
+								{
+									"key": "authUrl",
+									"value": "https://{{irisBrokerHost}}/auth/realms/user-idp/protocol/openid-connect/auth",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "idToken",
+									"type": "string"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "http://localhost:8080/",
+									"type": "string"
+								},
+								{
+									"key": "useBrowser",
+									"value": false,
+									"type": "boolean"
+								},
+								{
+									"key": "scope",
+									"value": "openid",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "demo",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "mhe",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "mhe",
+									"type": "string"
+								},
+								{
+									"key": "headerPrefix",
+									"value": "Bearer ",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Check permissions",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessTokenUrl",
+							"value": "https://{{irisHost}}/auth/realms/default/protocol/openid-connect/token",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "{{clientSecret}}",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "{{clientId}}",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer ",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+						"key": "X-Auth-Identity",
+						"value": "Bearer {{idToken}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"queries\": [\n        {\n            \"actions\": [\n                \"read\"\n            ],\n            \"resource\": \"payment_method\"\n        },\n        {\n            \"actions\": [\n                \"create\"\n            ],\n            \"resource\": \"invoice\"\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{chevronApiUrl}}/check?application={{application}}",
+					"host": [
+						"{{chevronApiUrl}}"
+					],
+					"path": [
+						"check"
+					],
+					"query": [
+						{
+							"key": "application",
+							"value": "{{application}}"
+						}
+					]
+				},
+				"description": "check whether given permission queries (actions, resource) are valid for the given application"
+			},
+			"response": [
+				{
+					"name": "either no application name specified or no role given",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"queries\": [\n        {\n            \"actions\": [\n                \"<string>\",\n                \"<string>\"\n            ],\n            \"resource\": \"/users\"\n        },\n        {\n            \"actions\": [\n                \"<string>\",\n                \"<string>\"\n            ],\n            \"resource\": \"/users\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/check?application=<string>&role=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"check"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				},
+				{
+					"name": "permission check result",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"queries\": [\n        {\n            \"actions\": [\n                \"<string>\",\n                \"<string>\"\n            ],\n            \"resource\": \"/users\"\n        },\n        {\n            \"actions\": [\n                \"<string>\",\n                \"<string>\"\n            ],\n            \"resource\": \"/users\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/check?application=<string>&role=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"check"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "true"
+				},
+				{
+					"name": "unexpected error",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"queries\": [\n        {\n            \"actions\": [\n                \"<string>\",\n                \"<string>\"\n            ],\n            \"resource\": \"/users\"\n        },\n        {\n            \"actions\": [\n                \"<string>\",\n                \"<string>\"\n            ],\n            \"resource\": \"/users\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/check?application=<string>&role=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"check"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"status": "Internal Server Error",
+					"code": 500,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				},
+				{
+					"name": "permission check result is false",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"queries\": [\n        {\n            \"actions\": [\n                \"<string>\",\n                \"<string>\"\n            ],\n            \"resource\": \"/users\"\n        },\n        {\n            \"actions\": [\n                \"<string>\",\n                \"<string>\"\n            ],\n            \"resource\": \"/users\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/check?application=<string>&role=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"check"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"status": "Forbidden",
+					"code": 403,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get permissions",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessTokenUrl",
+							"value": "https://{{irisHost}}/auth/realms/default/protocol/openid-connect/token",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "{{clientSecret}}",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "{{clientId}}",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer ",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+						"key": "X-Auth-Identity",
+						"value": "<string>",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{chevronApiUrl}}/permissions?application={{application}}",
+					"host": [
+						"{{chevronApiUrl}}"
+					],
+					"path": [
+						"permissions"
+					],
+					"query": [
+						{
+							"key": "application",
+							"value": "{{application}}",
+							"description": "(Required) application required for getting the permissions"
+						}
+					]
+				},
+				"description": "get permissions by application"
+			},
+			"response": [
+				{
+					"name": "object with list of permissions",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"filter\": {\n  \"resources\": [\n   \"/users\",\n   \"/groups\"\n  ],\n  \"roles\": [\n   \"admin\",\n   \"guest\"\n  ]\n },\n \"permissions\": [\n  {\n   \"actions\": [\n    \"elit in aliquip\",\n    \"consectetur dolor\"\n   ],\n   \"resource\": \"/users\",\n   \"role\": \"admin\"\n  },\n  {\n   \"actions\": [\n    \"in est eu sit\",\n    \"et in est Excepteur\"\n   ],\n   \"resource\": \"/users\",\n   \"role\": \"admin\"\n  }\n ]\n}"
+				},
+				{
+					"name": "no application name specified",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				},
+				{
+					"name": "unexpected error",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "Internal Server Error",
+					"code": 500,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get permissions by role",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessTokenUrl",
+							"value": "https://{{irisHost}}/auth/realms/default/protocol/openid-connect/token",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "{{clientSecret}}",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "{{clientId}}",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer ",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+						"key": "X-Auth-Identity",
+						"value": "<string>",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{chevronApiUrl}}/permissions?application={{application}}&role=demo_portal_user",
+					"host": [
+						"{{chevronApiUrl}}"
+					],
+					"path": [
+						"permissions"
+					],
+					"query": [
+						{
+							"key": "application",
+							"value": "{{application}}"
+						},
+						{
+							"key": "role",
+							"value": "demo_portal_user"
+						}
+					]
+				},
+				"description": "get permissions by application"
+			},
+			"response": [
+				{
+					"name": "unexpected error",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "Internal Server Error",
+					"code": 500,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				},
+				{
+					"name": "no application name specified",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				},
+				{
+					"name": "object with list of permissions",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"filter\": {\n  \"resources\": [\n   \"/users\",\n   \"/groups\"\n  ],\n  \"roles\": [\n   \"admin\",\n   \"guest\"\n  ]\n },\n \"permissions\": [\n  {\n   \"actions\": [\n    \"elit in aliquip\",\n    \"consectetur dolor\"\n   ],\n   \"resource\": \"/users\",\n   \"role\": \"admin\"\n  },\n  {\n   \"actions\": [\n    \"in est eu sit\",\n    \"et in est Excepteur\"\n   ],\n   \"resource\": \"/users\",\n   \"role\": \"admin\"\n  }\n ]\n}"
+				}
+			]
+		},
+		{
+			"name": "Get permissions by multiple roles",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessTokenUrl",
+							"value": "https://{{irisHost}}/auth/realms/default/protocol/openid-connect/token",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "{{clientSecret}}",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "{{clientId}}",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer ",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+						"key": "X-Auth-Identity",
+						"value": "<string>",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{chevronApiUrl}}/permissions?application={{application}}&role=demo_portal_user&role=demo_tel_support",
+					"host": [
+						"{{chevronApiUrl}}"
+					],
+					"path": [
+						"permissions"
+					],
+					"query": [
+						{
+							"key": "application",
+							"value": "{{application}}"
+						},
+						{
+							"key": "role",
+							"value": "demo_portal_user"
+						},
+						{
+							"key": "role",
+							"value": "demo_tel_support"
+						}
+					]
+				},
+				"description": "get permissions by application"
+			},
+			"response": [
+				{
+					"name": "no application name specified",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				},
+				{
+					"name": "object with list of permissions",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"filter\": {\n  \"resources\": [\n   \"/users\",\n   \"/groups\"\n  ],\n  \"roles\": [\n   \"admin\",\n   \"guest\"\n  ]\n },\n \"permissions\": [\n  {\n   \"actions\": [\n    \"elit in aliquip\",\n    \"consectetur dolor\"\n   ],\n   \"resource\": \"/users\",\n   \"role\": \"admin\"\n  },\n  {\n   \"actions\": [\n    \"in est eu sit\",\n    \"et in est Excepteur\"\n   ],\n   \"resource\": \"/users\",\n   \"role\": \"admin\"\n  }\n ]\n}"
+				},
+				{
+					"name": "unexpected error",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "Internal Server Error",
+					"code": 500,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get permissions by role and resource",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessTokenUrl",
+							"value": "https://{{irisHost}}/auth/realms/default/protocol/openid-connect/token",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "{{clientSecret}}",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "{{clientId}}",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer ",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+						"key": "X-Auth-Identity",
+						"value": "<string>",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{chevronApiUrl}}/permissions?application={{application}}&role=demo_portal_user&resource=invoice",
+					"host": [
+						"{{chevronApiUrl}}"
+					],
+					"path": [
+						"permissions"
+					],
+					"query": [
+						{
+							"key": "application",
+							"value": "{{application}}"
+						},
+						{
+							"key": "role",
+							"value": "demo_portal_user"
+						},
+						{
+							"key": "resource",
+							"value": "invoice"
+						}
+					]
+				},
+				"description": "get permissions by application"
+			},
+			"response": [
+				{
+					"name": "object with list of permissions",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"filter\": {\n  \"resources\": [\n   \"/users\",\n   \"/groups\"\n  ],\n  \"roles\": [\n   \"admin\",\n   \"guest\"\n  ]\n },\n \"permissions\": [\n  {\n   \"actions\": [\n    \"elit in aliquip\",\n    \"consectetur dolor\"\n   ],\n   \"resource\": \"/users\",\n   \"role\": \"admin\"\n  },\n  {\n   \"actions\": [\n    \"in est eu sit\",\n    \"et in est Excepteur\"\n   ],\n   \"resource\": \"/users\",\n   \"role\": \"admin\"\n  }\n ]\n}"
+				},
+				{
+					"name": "no application name specified",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				},
+				{
+					"name": "unexpected error",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "Internal Server Error",
+					"code": 500,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get permissions by id-token",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessTokenUrl",
+							"value": "https://{{irisHost}}/auth/realms/default/protocol/openid-connect/token",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "{{clientSecret}}",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "{{clientId}}",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer ",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+						"key": "X-Auth-Identity",
+						"value": "Bearer {{idToken}}"
+					}
+				],
+				"url": {
+					"raw": "{{chevronApiUrl}}/permissions?application={{application}}",
+					"host": [
+						"{{chevronApiUrl}}"
+					],
+					"path": [
+						"permissions"
+					],
+					"query": [
+						{
+							"key": "application",
+							"value": "{{application}}",
+							"description": "(Required) application required for getting the permissions"
+						}
+					]
+				},
+				"description": "get permissions by application"
+			},
+			"response": [
+				{
+					"name": "object with list of permissions",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"filter\": {\n  \"resources\": [\n   \"/users\",\n   \"/groups\"\n  ],\n  \"roles\": [\n   \"admin\",\n   \"guest\"\n  ]\n },\n \"permissions\": [\n  {\n   \"actions\": [\n    \"elit in aliquip\",\n    \"consectetur dolor\"\n   ],\n   \"resource\": \"/users\",\n   \"role\": \"admin\"\n  },\n  {\n   \"actions\": [\n    \"in est eu sit\",\n    \"et in est Excepteur\"\n   ],\n   \"resource\": \"/users\",\n   \"role\": \"admin\"\n  }\n ]\n}"
+				},
+				{
+					"name": "unexpected error",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "Internal Server Error",
+					"code": 500,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				},
+				{
+					"name": "no application name specified",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"description": "identity token containing roles, example: Bearer fefhbGciOiJIUsInzI1NiI...",
+								"key": "X-Auth-Identity",
+								"value": "<string>"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/permissions?application=<string>&role=<string>&resource=<string>&groupByResource=<boolean>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"permissions"
+							],
+							"query": [
+								{
+									"key": "application",
+									"value": "<string>"
+								},
+								{
+									"key": "role",
+									"value": "<string>"
+								},
+								{
+									"key": "resource",
+									"value": "<string>"
+								},
+								{
+									"key": "groupByResource",
+									"value": "<boolean>"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"details\": \"internal server errror\",\n \"error\": \"something unexpected happened\",\n \"hint\": \"please contact DL-DH_EI_Team_Io@telekom.de\"\n}"
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessTokenUrl",
+				"value": "https://{{irisHost}}/auth/realms/default/protocol/openid-connect/token",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "{{clientSecret}}",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{clientId}}",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "client_credentials",
+				"type": "string"
+			},
+			{
+				"key": "headerPrefix",
+				"value": "Bearer ",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "irisBrokerHost",
+			"value": "iris-broker-playground.live.dhei.telekom.de"
+		},
+		{
+			"key": "irisHost",
+			"value": "iris-playground.live.dhei.telekom.de"
+		},
+		{
+			"key": "chevronApiUrl",
+			"value": "https://stargate-playground.live.dhei.telekom.de/eni/chevron/v2"
+		},
+		{
+			"key": "application",
+			"value": "eni--io--chevron-demo"
+		},
+		{
+			"key": "idToken",
+			"value": "change me"
+		},
+		{
+			"key": "clientId",
+			"value": "eni--io--chevron-demo"
+		},
+		{
+			"key": "clientSecret",
+			"value": "*****"
+		}
+	]
+}

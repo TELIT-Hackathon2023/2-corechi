@@ -1,0 +1,70 @@
+@startuml
+ 
+title Sending and Receiving Events via Callback
+ 
+autonumber "<b>[000]"
+ 
+participant Subscriber as consumer
+participant Rover as rover
+queue subscription
+participant Horizon as intermediary
+participant StarGate as gateway
+participant Iris as idp
+participant Publisher as provider
+ 
+== Create Event Subscription ==
+consumer -> rover : process subscriber rover.yaml
+activate rover
+rover -> provider : notify request for event type
+activate provider
+rover <- provider : grant access in mission control
+deactivate provider
+rover -> subscription ** : create subscription\nwith callback URL
+consumer <- rover : send approval mail
+deactivate rover
+
+
+== Access Authentication ==
+ 
+idp <- provider: Authenticate (Client Credentials)
+activate idp
+note left: Publisher has previously registered with rover and has client id + secret.\nPublisher authenticates for access with OIDC client credential grant.
+idp -> idp  : Validate
+idp -> provider : 200 OK + Bearer Access Token
+deactivate idp
+
+== Send Event with Callback ==
+gateway <- provider : POST https://stargate.<env>.telekom.de/horizon/events/v1\nAuthorization: Bearer <Token>
+activate gateway
+intermediary <- gateway : forward event to Horizon
+activate intermediary
+intermediary --> gateway : 201 created
+gateway --> provider : 201 created
+deactivate gateway
+subscription <- intermediary : check subscribers\nfor given event type
+activate subscription
+subscription -> intermediary: return list of susbcribers
+deactivate subscription
+intermediary -> gateway : forward event for delivery
+activate gateway
+gateway -> gateway : replace Access Token\nwith Gateway Token
+consumer <- gateway: POST https://consumer.callback/receiveEvents\nAuthorization: Bearer <Gateway-Token>
+consumer --> gateway : 200 OK
+intermediary <-- gateway : 200 OK
+deactivate gateway
+deactivate intermediary
+
+== Connection Closed / Interrupted ==
+
+intermediary -> gateway : forward event for delivery
+activate intermediary
+note left: If the connection is broken or interrupted,\nHorizon will reattempt event delivery, at a later time.
+activate gateway
+gateway -> gateway : replace Access Token\nwith Gateway Token
+consumer <-- gateway : Subscriber not available
+destroy consumer
+intermediary <-- gateway : 500 internal server error
+deactivate gateway
+deactivate intermediary
+ 
+@enduml

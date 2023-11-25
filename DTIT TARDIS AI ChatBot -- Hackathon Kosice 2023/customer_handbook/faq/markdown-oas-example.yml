@@ -1,0 +1,30 @@
+openapi: "3.0.0"
+info:
+  title: "My Cool API"
+  version: "1.0.0"
+  x-api-category: "SYSTEM"
+  description: "# This is header 1
+  
+  ## This is Header 2
+  
+  ![My cool Diagram](https://plantuml.devops.telekom.de/svg/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000)
+  
+  
+  Some description to my cool diagram.
+  
+  ## Some Header 3
+  
+  - Of course some list
+  
+  - With 2 options
+  
+  
+  My Links to [the git](https://gitlab.devops.telekom.de/)
+  
+  My **Bold** or any *other fomrated* _text_.
+  
+  ### Lets make diagram clickable
+  
+  Read more under [Markdown examples](https://developer.telekom.de/docs/src/developer_portal_howtos/examples/examples/#zoomable-images). Now use can zoom in by clicking on diagram.
+  
+  [![My cool Diagram](https://plantuml.devops.telekom.de/svg/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000)](https://plantuml.devops.telekom.de/svg/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000)"

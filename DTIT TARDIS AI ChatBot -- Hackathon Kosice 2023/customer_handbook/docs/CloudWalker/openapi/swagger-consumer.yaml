@@ -1,0 +1,543 @@
+swagger: '2.0'
+info:
+  description: >-
+    API for Clients using CloudWalker File Vault Consumer to upload files on
+    cloud
+  version: 1.7.0
+  title: CloudWalker File Vault Consumer API
+  contact:
+    name: Enterprise Integration (ENI) Service Hub, Team DEIMOS
+    email: DTIT_ENI_Hub_Team_Deimos@telekom.de
+  license:
+    name: Deutsche Telekom AG
+  x-api-category: SYSTEM
+host: localhost
+basePath: /cfv-consumer/v1
+tags:
+  - name: files
+    description: Client File Location Controller
+  - name: management
+    description: Client File Metadata Management Controller
+paths:
+  /files/locations:
+    post:
+      tags:
+        - files
+      summary: Create location for file upload
+      description: >-
+        Before the actual upload of the file, an upload location needs to be
+        requested. This is done via post request body.
+      operationId: createLocationUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: locationRequestDTO
+          description: Location data requested from client
+          required: true
+          schema:
+            $ref: '#/definitions/LocationRequestDto'
+        - name: X-FileNameEncoded
+          in: header
+          description: X-FileNameEncoded
+          required: false
+          type: boolean
+          default: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/LocationDTO'
+        '201':
+          description: >-
+            Created. Server authorized client (m2m communication), and
+            successfully created location for the new resource. The new resource
+            has an implicit offset of 0.
+        '400':
+          description: Bad request. Invalid body
+        '401':
+          description: >-
+            Unauthorized. The Client has not provided authentication to fulfil
+            the request.
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /files/{fileId}:
+    head:
+      tags:
+        - files
+      summary: Get offset
+      description: >-
+        Returns the amount of uploaded bytes of the specified file, which is
+        equal to the upload offset. The offset is returned as a header.
+      operationId: getOffsetUsingHEAD
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: fileId
+          in: path
+          description: Id of file.
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK. Offset was successfully sent.
+        '204':
+          description: No Content
+        '400':
+          description: Bad request. Input parameter malformed.
+        '401':
+          description: >-
+            Unauthorized. The Client has not provided authorization to fulfil
+            the request.
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found. Request against a non-existent resource.
+  /files/{fileId}/upload:
+    patch:
+      tags:
+        - files
+      summary: Chunk upload
+      description: >-
+        Apply the bytes contained in the message, to the file, at the given
+        offset specified by the Upload-Offset header.
+      operationId: chunkUploadUsingPATCH
+      consumes:
+        - application/octet-stream
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: fileChunk
+          description: fileChunk
+          required: false
+          schema:
+            type: string
+            format: byte
+        - name: fileId
+          in: path
+          description: Id of file.
+          required: true
+          type: string
+          format: uuid
+        - name: Upload-Checksum
+          in: header
+          description: Header indicates the checksum of the current chunk upload.
+          required: true
+          type: string
+        - name: Upload-Length
+          in: header
+          description: >-
+            Header indicates the size of the entity-body, in bytes, sent to the
+            recipient.
+          required: true
+          type: integer
+          format: int32
+        - name: Upload-Offset
+          in: header
+          description: >-
+            Header indicates a byte offset within a resource. The value MUST be
+            a non-negative integer.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+        '204':
+          description: >-
+            No Content. Server authorized client (m2m communication), and has
+            successfully written the chunk. New upload-offset is returned.
+        '400':
+          description: >-
+            Bad request. Checksum mismatch or unsupported algorithm by the
+            server.
+        '401':
+          description: >-
+            Unauthorized. The Client has not provided authentication to fulfil
+            the request.
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found. Request against a non-existent resource.
+        '409':
+          description: >-
+            Conflict. The Upload-Offset header's value MUST be equal to the
+            current offset of the resource.
+  /management/batch/client-file-metadata/notifications:
+    post:
+      tags:
+        - management
+      summary: Send internal notification to file vault provider in batch mode.
+      description: >-
+        Post request used to send internal notification from file vault consumer
+        to file vault provider in batch mode.
+      operationId: sendInternalNotificationInBatchUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          type: integer
+          format: int64
+        - name: paged
+          in: query
+          required: false
+          type: boolean
+        - name: pageNumber
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: pageSize
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: search
+          in: query
+          description: search
+          required: false
+          type: string
+        - name: sort.sorted
+          in: query
+          required: false
+          type: boolean
+        - name: sort.unsorted
+          in: query
+          required: false
+          type: boolean
+        - name: unpaged
+          in: query
+          required: false
+          type: boolean
+      responses:
+        '200':
+          description: Ok - request for notification was sent successfully.
+          schema:
+            $ref: '#/definitions/BatchOperationResponseDto'
+        '201':
+          description: Created
+        '400':
+          description: >-
+            Bad request. Business exception - The request hasn't been fulfilled
+            because of wrong request data.
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error. Notification failed.
+  /management/client-file-metadata:
+    get:
+      tags:
+        - management
+      summary: Search for client file metadata.
+      description: Get request used to search for client file metadata in repository.
+      operationId: searchClientFileMetadataUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          type: integer
+          format: int64
+        - name: paged
+          in: query
+          required: false
+          type: boolean
+        - name: pageNumber
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: pageSize
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: search
+          in: query
+          description: search
+          required: false
+          type: string
+        - name: sort.sorted
+          in: query
+          required: false
+          type: boolean
+        - name: sort.unsorted
+          in: query
+          required: false
+          type: boolean
+        - name: unpaged
+          in: query
+          required: false
+          type: boolean
+      responses:
+        '200':
+          description: >-
+            Ok - request for search was send successfully and page of client
+            file metadata was returned.
+          schema:
+            $ref: '#/definitions/PageOfClientFileMetadataResponseDto'
+        '400':
+          description: >-
+            Bad request. Business exception - The request hasn't been fulfilled
+            because of wrong request data.
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+definitions:
+  BatchOperationResponseDto:
+    type: object
+    properties:
+      detail:
+        type: string
+      errors:
+        type: array
+        items:
+          $ref: '#/definitions/ManagementApiOperationResultDto'
+      processed:
+        type: array
+        items:
+          $ref: '#/definitions/ManagementApiOperationResultDto'
+      title:
+        type: string
+    title: BatchOperationResponseDto
+  ClientFileMetadataResponseDto:
+    type: object
+    properties:
+      checksum:
+        type: string
+      compressed:
+        type: boolean
+      createdBy:
+        type: string
+      createdDate:
+        type: string
+        format: date-time
+      customMetadata:
+        type: string
+      encrypted:
+        type: boolean
+      extension:
+        type: string
+      fileType:
+        type: string
+      id:
+        type: string
+        format: uuid
+      lastModifiedBy:
+        type: string
+      modifiedDate:
+        type: string
+        format: date-time
+      name:
+        type: string
+      size:
+        type: string
+      status:
+        type: string
+      timeToLive:
+        type: integer
+        format: int64
+    title: ClientFileMetadataResponseDto
+  LocationDTO:
+    type: object
+    properties:
+      initialOffset:
+        type: integer
+        format: int64
+      location:
+        type: string
+        format: uuid
+    title: LocationDTO
+  LocationRequestDto:
+    type: object
+    required:
+      - checksum
+      - name
+      - size
+      - timeToLive
+    properties:
+      checksum:
+        type: string
+      compressed:
+        type: boolean
+      customMetadata:
+        type: string
+      encrypted:
+        type: boolean
+      extension:
+        type: string
+      fileType:
+        type: string
+      name:
+        type: string
+      size:
+        type: integer
+        format: int64
+      timeToLive:
+        type: integer
+        format: int64
+    title: LocationRequestDto
+  ManagementApiOperationResultDto:
+    type: object
+    properties:
+      detail:
+        type: string
+      entityId:
+        type: string
+        format: uuid
+      status:
+        type: string
+        enum:
+          - ACCEPTED
+          - ALREADY_REPORTED
+          - BAD_GATEWAY
+          - BAD_REQUEST
+          - BANDWIDTH_LIMIT_EXCEEDED
+          - CHECKPOINT
+          - CONFLICT
+          - CONTINUE
+          - CREATED
+          - DESTINATION_LOCKED
+          - EXPECTATION_FAILED
+          - FAILED_DEPENDENCY
+          - FORBIDDEN
+          - FOUND
+          - GATEWAY_TIMEOUT
+          - GONE
+          - HTTP_VERSION_NOT_SUPPORTED
+          - IM_USED
+          - INSUFFICIENT_SPACE_ON_RESOURCE
+          - INSUFFICIENT_STORAGE
+          - INTERNAL_SERVER_ERROR
+          - I_AM_A_TEAPOT
+          - LENGTH_REQUIRED
+          - LOCKED
+          - LOOP_DETECTED
+          - METHOD_FAILURE
+          - METHOD_NOT_ALLOWED
+          - MOVED_PERMANENTLY
+          - MOVED_TEMPORARILY
+          - MULTIPLE_CHOICES
+          - MULTI_STATUS
+          - NETWORK_AUTHENTICATION_REQUIRED
+          - NON_AUTHORITATIVE_INFORMATION
+          - NOT_ACCEPTABLE
+          - NOT_EXTENDED
+          - NOT_FOUND
+          - NOT_IMPLEMENTED
+          - NOT_MODIFIED
+          - NO_CONTENT
+          - OK
+          - PARTIAL_CONTENT
+          - PAYLOAD_TOO_LARGE
+          - PAYMENT_REQUIRED
+          - PERMANENT_REDIRECT
+          - PRECONDITION_FAILED
+          - PRECONDITION_REQUIRED
+          - PROCESSING
+          - PROXY_AUTHENTICATION_REQUIRED
+          - REQUESTED_RANGE_NOT_SATISFIABLE
+          - REQUEST_ENTITY_TOO_LARGE
+          - REQUEST_HEADER_FIELDS_TOO_LARGE
+          - REQUEST_TIMEOUT
+          - REQUEST_URI_TOO_LONG
+          - RESET_CONTENT
+          - SEE_OTHER
+          - SERVICE_UNAVAILABLE
+          - SWITCHING_PROTOCOLS
+          - TEMPORARY_REDIRECT
+          - TOO_EARLY
+          - TOO_MANY_REQUESTS
+          - UNAUTHORIZED
+          - UNAVAILABLE_FOR_LEGAL_REASONS
+          - UNPROCESSABLE_ENTITY
+          - UNSUPPORTED_MEDIA_TYPE
+          - UPGRADE_REQUIRED
+          - URI_TOO_LONG
+          - USE_PROXY
+          - VARIANT_ALSO_NEGOTIATES
+      title:
+        type: string
+    title: ManagementApiOperationResultDto
+  PageOfClientFileMetadataResponseDto:
+    type: object
+    properties:
+      content:
+        type: array
+        items:
+          $ref: '#/definitions/ClientFileMetadataResponseDto'
+      empty:
+        type: boolean
+      first:
+        type: boolean
+      last:
+        type: boolean
+      number:
+        type: integer
+        format: int32
+      numberOfElements:
+        type: integer
+        format: int32
+      pageable:
+        $ref: '#/definitions/Pageable'
+      size:
+        type: integer
+        format: int32
+      sort:
+        $ref: '#/definitions/Sort'
+      totalElements:
+        type: integer
+        format: int64
+      totalPages:
+        type: integer
+        format: int32
+    title: PageOfClientFileMetadataResponseDto
+  Pageable:
+    type: object
+    properties:
+      offset:
+        type: integer
+        format: int64
+      pageNumber:
+        type: integer
+        format: int32
+      pageSize:
+        type: integer
+        format: int32
+      paged:
+        type: boolean
+      sort:
+        $ref: '#/definitions/Sort'
+      unpaged:
+        type: boolean
+    title: Pageable
+  Sort:
+    type: object
+    properties:
+      empty:
+        type: boolean
+      sorted:
+        type: boolean
+      unsorted:
+        type: boolean
+    title: Sort
