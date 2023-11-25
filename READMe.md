@@ -16,7 +16,7 @@ Before running the application, make sure you have the following installed:
 - Flask (`pip install Flask`)
 - spaCy (`pip install spacy`)
 - scikit-learn (`pip install scikit-learn`)
-- en_core_web_md (`python3 -m spacy download en_core_web_sm`)
+- en_core_web_md (`python3 -m spacy download en_core_web_md`)
 
 ## Swagger API documentation
 Can be accessed in api-swagger-documentation.yml [api-swagger-documentation.yml]
