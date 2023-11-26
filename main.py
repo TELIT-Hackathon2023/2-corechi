@@ -22,7 +22,7 @@ def read_docs(folder):
 
 documents = read_docs(docs_folder)
 
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_md")
 ps = PorterStemmer()
 
 
@@ -53,7 +53,7 @@ def extract_relevant_info(document, query):
     similarity_scores = cosine_similarity(query_vector,
                                           vectorizer.transform([" ".join(preprocess_text(sent)) for sent in sentences]))
 
-    threshold = 0.1
+    threshold = 0.25
 
     if len(sentences) == 0:
         return "Please enter valid input."
