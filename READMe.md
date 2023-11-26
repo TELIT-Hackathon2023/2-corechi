@@ -32,7 +32,7 @@ cd "2-CORECHI" ##changing directory to current project
 souce venv/bin/activate ##starting virtual python enviroment to run flask
 python3 main.py ##starting app
 
-## Localhost adress
+## Localhost address
 ```bash
 http://127.0.0.1:5000
 ```
