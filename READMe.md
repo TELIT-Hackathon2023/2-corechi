@@ -2,6 +2,11 @@
 
 The TARDIS AI Chatbot is a simple web-based chatbot application that uses natural language processing (NLP) to provide answers based on a set of predefined documents. The chat history is displayed on the web page, and users can rate the chatbot's answers.
 
+## Chatbot design
+
+![Design_white](design_white.png)
+![Design_black](design_black.png)
+
 ## Features
 
 - User-friendly web interface.
@@ -36,6 +41,3 @@ python3 main.py ##starting app
 ```bash
 http://127.0.0.1:5000
 ```
-## Chatbot design
-
-![Design](TardisDesign.png)
