@@ -53,7 +53,7 @@ def extract_relevant_info(document, query):
     similarity_scores = cosine_similarity(query_vector,
                                           vectorizer.transform([" ".join(preprocess_text(sent)) for sent in sentences]))
 
-    threshold = 0.25
+    threshold = 0.1
 
     if len(sentences) == 0:
         return "Please enter valid input."
