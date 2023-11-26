@@ -21,10 +21,16 @@ Before running the application, make sure you have the following installed:
 
 ## Structure
 
-app.py: The main Flask application file.
+main.py: The main Flask application file.
 docs/: Folder containing the documents used for chatbot responses.
 static/: Folder containing static assets such as images.
 templates/: Folder containing HTML templates for rendering web pages.
+
+## Starting app - via terminal
+
+cd "2-CORECHI" ##changing directory to current project
+souce venv/bin/activate ##starting virtual python enviroment to run flask
+python3 main.py ##starting app
 
 ## Localhost adress
 ```bash
