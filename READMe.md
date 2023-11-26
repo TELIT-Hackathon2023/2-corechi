@@ -13,6 +13,7 @@ The TARDIS AI Chatbot is a simple web-based chatbot application that uses natura
 - Chat history display with user inputs and chatbot responses.
 - Ability to rate chatbot answers.
 - Ability to create Jira Ticket automatically.
+- API Documentation in form of Swagger
 
 ## Prerequisites
 
