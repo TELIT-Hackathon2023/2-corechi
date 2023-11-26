@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .user-message {
+            /* background-color: #E5E7EB; ustomize the background color for user messages */
+            align-self: flex-end; /* Align user messages to the end of the flex container */
+        }
+
+        .bot-message {
+            align-self: flex-start; /* Align bot messages to the start of the flex container */
+        }
+
+        .user-message>div {
+            /* box-shadow: 0 1px 2px #E5E7EB; Apply shadow to the message content */
+            background-color: #E5E7EB; /* Change the background color of the user message box */
+            border-radius: 8px; /* Optional: Add border-radius for rounded corners */
+            padding: 10px; /* Optional: Add padding for spacing within the box */
+        }
+
+        /* Add styles for the dark/light mode switch */
+        .mode-switch {
+            position: absolute;
+            top: 0.25rem;
+            right: 1rem;
+        }
+
+        /* Customize the switch appearance */
+        .mode-switch input {
+            height: 0;
+            width: 0;
+            visibility: hidden;
+        }
+
+        .mode-switch label {
+            cursor: pointer;
+            text-indent: -9999px;
+            width: 40px;
+            height: 20px;
+            background: grey;
+            display: block;
+            border-radius: 100px;
+            position: relative;
+        }
+
+        label:after {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 5px;
+            width: 15px;
+            height: 15px;
+            background: #fff;
+            border-radius: 90px;
+            transition: 0.3s;
+        }
+
+        input:checked+label {
+            background: #2196F3;
+        }
+
+        input:checked+label:after {
+            left: calc(100% - 5px);
+            transform: translateX(-100%);
+        }
+
+        /* Add dark mode styles here */
+        .dark-mode .user-message > div {
+            background-color: #333; /* Dark mode background color for user messages */
+            box-shadow: 0 1px 2px #555; /* Dark mode box shadow for user messages */
+        }
+
+        .dark-mode .bot-message > div {
+            background-color: #555; /* Dark mode background color for bot messages */
+            box-shadow: 0 1px 2px #777; /* Dark mode box shadow for bot messages */
+        }
+
+            /* Add dark mode styles here */
+        .dark-mode .chat-history {
+            background-color: #1f1f1f; /* Dark mode background color for chat history sidebar */
+            color: #fff; /* Dark mode text color for chat history sidebar */
+        }
+
+        .dark-mode #chatWindow {
+            background-color: #1f1f1f; /* Dark mode background color for chat window */
+            color: #fff; /* Dark mode text color for chat window */
+        }
+
+        .dark-mode #messageInput {
+            background-color: #1f1f1f; /* Dark mode background color for message input */
+            border-color: #333; /* Dark mode border color for message input */
+            color: #fff; 
+        }
+    </style>
+
+</head>
+
+<body class="font-sans antialiased text-gray-800">
+    <div class="flex h-screen">
+        <!-- Dark/Light mode switch -->
+        <div class="mode-switch">
+            <input type="checkbox" id="darkModeSwitch" />
+            <label for="darkModeSwitch">Dark/Light</label>
+        </div>
+
+        <!-- Chat history sidebar -->
+        <div class="chat-history w-1/4 p-4 overflow-y-auto">
+            <h2 class="text-xl font-semibold mb-4 flex items-center justify-between">
+                Chat History
+                <button id="newChatBtn" class="p-2 rounded-full bg-blue-500 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    New Chat
+                </button>
+            </h2>
+            <!-- Chat history list -->
+            <div id="chatHistoryList" class="space-y-2">
+                <!-- Messages will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Chat window -->
+        <div id="chatWindow" class="chat-window flex-1 flex flex-col">
+            <!-- Chat header -->
+            <div class="p-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold">Chat</h2>
+            </div>
+            <!-- Chat messages -->
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto flex flex-col-reverse">
+                <!-- Messages will be dynamically added here -->
+            </div>
+            <!-- Message input -->
+            <div class="message-input p-2 border-t border-gray-200">
+                <div class="flex items-center space-x-2">
+                    <input id="messageInput" type="text" placeholder="Type your message"
+                        class="flex-1 p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button id="sendMessageBtn"
+                        class="p-2 rounded-full bg-blue-500 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-9.184-3.84 9.184-3.84v2.88l5.248-2.16v6.24l-5.248-2.16v2.88z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script src="app.js"></script>
+    </div>
+</body>
+
+</html>
